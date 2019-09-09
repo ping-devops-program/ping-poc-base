@@ -1,0 +1,16 @@
+ID=1392594
+Organization=68
+Product=PingFederate
+Version=9.3
+IssueDate=2019-09-9
+EnforcementType=3
+Bridge=true
+ConnectionLimit=1
+NodeLimit=99
+Tier=Subscription
+SaasProvisioning=true
+WSTrustSTS=true
+OAuth=true
+GracePeriod=30
+SignCode=FF3F
+Signature=302C0214648FC8A19D25989C0C5C14C21A2B7F48AB8DEEA302142C77EC56C5059C6DB635F4136ECCD48C419A1B92
