@@ -1,0 +1,12 @@
+# This service exposes the pingaccess console to the cluster.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingaccess
+spec:
+  ports:
+    - port: 9000
+      name: pa-console
+    - port: 443
+      name: pa-admin

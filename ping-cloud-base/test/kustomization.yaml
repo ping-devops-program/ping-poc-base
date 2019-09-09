@@ -1,0 +1,45 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+
+resources:
+- ../k8s-configs
+
+configMapGenerator:
+- name: pingaccess-environment-variables
+  behavior: merge
+  env: env_vars
+- name: pingdataconsole-environment-variables
+  behavior: merge
+  env: env_vars
+- name: pingdirectory-environment-variables
+  behavior: merge
+  env: env_vars
+- name: pingfederate-environment-variables
+  behavior: merge
+  env: env_vars
+
+patchesJson6902:
+- path: logs_ingress_patch.yaml
+  target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: kibana-ingress
+- path: pingdataconsole_ingress_patch.yaml
+  target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: pingdataconsole-ingress
+- path: pingfederate_ingress_patch.yaml
+  target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: pingfederate-ingress
+- path: pingaccess_ingress_patch.yaml
+  target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: pingaccess-ingress

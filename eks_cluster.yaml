@@ -1,0 +1,39 @@
+## This is a SAMPLE eksctl deploy file. find more at: 
+# https://github.com/weaveworks/eksctl/tree/master/examples
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ping-poc-base
+  region: us-west-2
+
+# vpc:
+#   id: "vpc-0ff086f1cae7dea2f"  # (optional, must match VPC ID used for each subnet below)
+#   subnets:
+#     # must provide 'private' and/or 'public' subnets by availibility zone as shown
+#     public:
+#       us-west-2d:
+#         id: "subnet-0030b2ed693c99c56"
+#       us-west-2b:
+#         id: "subnet-08fadddc16ea5550d"
+#       us-west-2c:
+#         id: "subnet-05d8af2ff3770af6a"
+
+nodeGroups:
+  - name: base-nodegroup
+    instanceType: m5.2xlarge
+    desiredCapacity: 2
+    availabilityZones: ["us-west-2d", "us-west-2b","us-west-2c"]
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        externalDNS: true
+        certManager: true
+        appMesh: true
+        ebs: true
+        fsx: true
+        efs: true
+        albIngress: true
+        xRay: true
+        cloudWatch: true
