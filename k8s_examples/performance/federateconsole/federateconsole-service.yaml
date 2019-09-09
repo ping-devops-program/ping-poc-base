@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: f.q.d.n #configure this
+  labels:
+    app: pingfederateconsole
+    company: PingIdentity
+  name: pingfederateconsole
+  namespace: perf
+spec:
+  ports:
+  - name: pf-admin
+    protocol: TCP
+    port: 9999
+    targetPort: 9999
+  selector:
+    app: pingfederateconsole
+    company: PingIdentity
+  sessionAffinity: None

@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: pingfederateconsole
+    company: PingIdentity
+  name: pingfederateconsole
+  namespace: perf
+spec:
+  selector:
+    matchLabels:
+      app: pingfederateconsole
+      company: PingIdentity
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: pingfederateconsole
+        company: PingIdentity
+      name: pingfederateconsole
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: pingfederateconsole-configmap-cluster-console
+        image: pingidentity/pingfederate:edge
+        imagePullPolicy: Always
+        name: pingfederateconsole
+        ports:
+        - containerPort: 9999
+          protocol: TCP
+        # resources:
+        #   limits:
+        #     cpu: 3
+        #     memory: 3Gi
+        #   requests:
+        #     cpu: 3
+        #     memory: 3Gi
