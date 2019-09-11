@@ -1,0 +1,4 @@
+export HEAP_MAX=$(awk '$1~/MemAvailable/ {print int($2*0.9/1024)}' /proc/meminfo)
+export HEAP_NEW=$(awk '$1~/MemAvailable/ {print int($2*0.45/1024)}' /proc/meminfo)
+export threadsMin=$(awk '$1~/^processor/{cpu++}END{print int(cpu*25)}' /proc/cpuinfo)
+export threadsMax=$(awk '$1~/^processor/{cpu++}END{print int(cpu*50)}' /proc/cpuinfo)
