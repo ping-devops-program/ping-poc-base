@@ -43,7 +43,8 @@ https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos
 
 3. Add the kubernetes context to your kubectl config. 
   ```
-  aws eks --region us-west-2 update-kubeconfig --name ping-poc-base
+  aws eks --region <region>
+  update-kubeconfig --name ping-poc-base
   ```
 
 4. Set the new context and namespace:

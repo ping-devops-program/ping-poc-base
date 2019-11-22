@@ -59,7 +59,7 @@ export AWS_DEFAULT_PROFILE="aws_admin"
 ```
 
 
-### 4. set up eks_cluster.yaml file
+### 4. Set up eks_cluster.yaml file
 For eksctl, you can create a cluster with a command, or with a file. 
 I've found the file to be better because:
 - you have a stored representation of your cluster
@@ -160,12 +160,12 @@ kubectl delete deployment hello-node
 kubectl create namespace ping-poc-base
 ```
 
-# Create RBAC roles
+### 7. Create RBAC roles
 
 - [for a poc](#for-a-poc)
 - [for a multi-tenant cluster](for-a-multi-tenant-cluster)
 
-## For a POC: 
+#### For a POC: 
 1. For this, whichever user creates the EKS cluster (aws_admin), should create a second IAM user with privileges for **EKS only**. 
 
     - Follow https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console 
@@ -214,15 +214,17 @@ kubectl create namespace ping-poc-base
           ```
 
 
-## For a Mult-Tenant Cluster
+#### For a Mult-Tenant Cluster
 
 the following steps will create user-accounts and a namespace for every person that is to use the cluster. 
 
-1. create an AWS IAM group for EKS users. 
+1. create cluserrole: https://gitlab.corp.pingidentity.com/devops-program/gte-devops-scripts/blob/master/rsa-cluster-rbac/cluster-role.yaml
 
-2. Create an AWS IAM user for each user and add them to the group. 
+2.  create an AWS IAM group for EKS users. 
 
-3. see the scripts at: https://gitlab.corp.pingidentity.com/devops-program/gte-devops-scripts/blob/master/rsa-cluster-rbac/create-identity-mapping.sh
+3. Create an AWS IAM user for each user and add them to the group. 
+
+4. see the scripts at: https://gitlab.corp.pingidentity.com/devops-program/gte-devops-scripts/blob/master/rsa-cluster-rbac/create-identity-mapping.sh
 
 >make sure your AWS profile is the one that created the EKS Cluster, then run this script for each user:
 
@@ -230,5 +232,7 @@ the following steps will create user-accounts and a namespace for every person t
 ./create-identity-mapping.sh <aws-iam-username>
 ```
 
-be prepared to provide the user/key info to the users.
+## Next Steps: 
+- be prepared to provide the user/key info to the users.
+- may need to add URLs and hosted zones to route53. 
 
