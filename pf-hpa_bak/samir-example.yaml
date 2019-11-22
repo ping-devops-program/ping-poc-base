@@ -1,0 +1,2468 @@
+Initial TENANT_DOMAIN: d1.ping-devops-program.com
+Initial ENVIRONMENT: 
+Using TENANT_DOMAIN: d1.ping-devops-program.com
+Using ENVIRONMENT: samirgandhi
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: elastic-stack-logging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-dns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: git-ops-flux
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: ingress-nginx-private
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: ingress-nginx-public
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app: ping-cloud
+  name: ping-cloud-samirgandhi
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  labels:
+    app: elasticsearch
+  name: elasticsearch-gp2
+mountOptions:
+- discard
+parameters:
+  fsType: ext4
+  type: gp2
+provisioner: kubernetes.io/aws-ebs
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  labels:
+    app: elasticsearch
+  name: elasticsearch-io1
+mountOptions:
+- discard
+parameters:
+  fsType: ext4
+  iopsPerGB: "50"
+  type: io1
+provisioner: kubernetes.io/aws-ebs
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pingdirectory-gp2
+mountOptions:
+- discard
+parameters:
+  fsType: ext4
+  type: gp2
+provisioner: kubernetes.io/aws-ebs
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pingdirectory-io1
+mountOptions:
+- discard
+parameters:
+  fsType: ext4
+  iopsPerGB: "50"
+  type: io1
+provisioner: kubernetes.io/aws-ebs
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: bgpconfigurations.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: BGPConfiguration
+    plural: bgpconfigurations
+    singular: bgpconfiguration
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: bgppeers.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: BGPPeer
+    plural: bgppeers
+    singular: bgppeer
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: clusterinformations.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: ClusterInformation
+    plural: clusterinformations
+    singular: clusterinformation
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: felixconfigurations.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: FelixConfiguration
+    plural: felixconfigurations
+    singular: felixconfiguration
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: globalnetworkpolicies.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: GlobalNetworkPolicy
+    plural: globalnetworkpolicies
+    singular: globalnetworkpolicy
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: globalnetworksets.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: GlobalNetworkSet
+    plural: globalnetworksets
+    singular: globalnetworkset
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: hostendpoints.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: HostEndpoint
+    plural: hostendpoints
+    singular: hostendpoint
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: ippools.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: IPPool
+    plural: ippools
+    singular: ippool
+  scope: Cluster
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: networkpolicies.crd.projectcalico.org
+spec:
+  group: crd.projectcalico.org
+  names:
+    kind: NetworkPolicy
+    plural: networkpolicies
+    singular: networkpolicy
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: fluentd
+  name: fluentd
+  namespace: elastic-stack-logging
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-dns
+  namespace: external-dns
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx-private
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx-public
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: calico-node
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: typha-cpha
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pd-backup-serviceaccount
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: typha-cpha
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+- apiGroups:
+  - extensions
+  resources:
+  - deployments/scale
+  verbs:
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-ingress-role
+  namespace: ingress-nginx-private
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
+  - ingress-controller-leader-nginx
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-ingress-role
+  namespace: ingress-nginx-public
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
+  - ingress-controller-leader-nginx
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pd-backup-role
+  namespace: ping-cloud-samirgandhi
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: calico-node
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - serviceaccounts
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - watch
+  - list
+- apiGroups:
+  - crd.projectcalico.org
+  resources:
+  - globalfelixconfigs
+  - felixconfigurations
+  - bgppeers
+  - globalbgpconfigs
+  - bgpconfigurations
+  - ippools
+  - globalnetworkpolicies
+  - globalnetworksets
+  - networkpolicies
+  - clusterinformations
+  - hostendpoints
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: fluentd
+  name: fluentd
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: typha-cpha
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: external-dns
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-ingress-clusterrole-private
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  verbs:
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-ingress-clusterrole-public
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  verbs:
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: typha-cpha
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: typha-cpha
+subjects:
+- kind: ServiceAccount
+  name: typha-cpha
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-ingress-role-nisa-binding
+  namespace: ingress-nginx-private
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-ingress-role
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx-private
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-ingress-role-nisa-binding
+  namespace: ingress-nginx-public
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-ingress-role
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx-public
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pd-backup-role-binding
+  namespace: ping-cloud-samirgandhi
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pd-backup-role
+subjects:
+- kind: ServiceAccount
+  name: pd-backup-serviceaccount
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: calico-node
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: calico-node
+subjects:
+- kind: ServiceAccount
+  name: calico-node
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluentd
+subjects:
+- kind: ServiceAccount
+  name: fluentd
+  namespace: elastic-stack-logging
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: typha-cpha
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: typha-cpha
+subjects:
+- kind: ServiceAccount
+  name: typha-cpha
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: external-dns-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-dns
+subjects:
+- kind: ServiceAccount
+  name: external-dns
+  namespace: external-dns
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-ingress-clusterrole-nisa-binding-private
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-ingress-clusterrole-private
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx-private
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-ingress-clusterrole-nisa-binding-public
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-ingress-clusterrole-public
+subjects:
+- kind: ServiceAccount
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx-public
+---
+apiVersion: v1
+data:
+  kubernetes-namespace-logging.conf: |
+    <match **>
+      @type elasticsearch_dynamic
+      @id out_es_dynamic
+      @log_level info
+      include_tag_key true
+      host "#{ENV['FLUENT_ELASTICSEARCH_HOST']}"
+      port "#{ENV['FLUENT_ELASTICSEARCH_PORT']}"
+      path "#{ENV['FLUENT_ELASTICSEARCH_PATH']}"
+      scheme "#{ENV['FLUENT_ELASTICSEARCH_SCHEME'] || 'http'}"
+      ssl_verify "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERIFY'] || 'true'}"
+      ssl_version "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERSION'] || 'TLSv1'}"
+      user "#{ENV['FLUENT_ELASTICSEARCH_USER']}"
+      password "#{ENV['FLUENT_ELASTICSEARCH_PASSWORD']}"
+      reload_connections "#{ENV['FLUENT_ELASTICSEARCH_RELOAD_CONNECTIONS'] || 'false'}"
+      reconnect_on_error "#{ENV['FLUENT_ELASTICSEARCH_RECONNECT_ON_ERROR'] || 'true'}"
+      reload_on_failure "#{ENV['FLUENT_ELASTICSEARCH_RELOAD_ON_FAILURE'] || 'true'}"
+      log_es_400_reason "#{ENV['FLUENT_ELASTICSEARCH_LOG_ES_400_REASON'] || 'false'}"
+      logstash_prefix logstash-
+      logstash_format "#{ENV['FLUENT_ELASTICSEARCH_LOGSTASH_FORMAT'] || 'true'}"
+      index_name logstash-
+      type_name "#{ENV['FLUENT_ELASTICSEARCH_LOGSTASH_TYPE_NAME'] || 'fluentd'}"
+      <buffer>
+        flush_thread_count "#{ENV['FLUENT_ELASTICSEARCH_BUFFER_FLUSH_THREAD_COUNT'] || '8'}"
+        flush_interval "#{ENV['FLUENT_ELASTICSEARCH_BUFFER_FLUSH_INTERVAL'] || '5s'}"
+        chunk_limit_size "#{ENV['FLUENT_ELASTICSEARCH_BUFFER_CHUNK_LIMIT_SIZE'] || '2M'}"
+        queue_limit_length "#{ENV['FLUENT_ELASTICSEARCH_BUFFER_QUEUE_LIMIT_LENGTH'] || '32'}"
+        retry_max_interval "#{ENV['FLUENT_ELASTICSEARCH_BUFFER_RETRY_MAX_INTERVAL'] || '30'}"
+        retry_forever true
+      </buffer>
+    </match>
+kind: ConfigMap
+metadata:
+  name: kubernetes-namespace-logging
+  namespace: elastic-stack-logging
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-configuration
+  namespace: ingress-nginx-private
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: tcp-services
+  namespace: ingress-nginx-private
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: udp-services
+  namespace: ingress-nginx-private
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-configuration
+  namespace: ingress-nginx-public
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: tcp-services
+  namespace: ingress-nginx-public
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: udp-services
+  namespace: ingress-nginx-public
+---
+apiVersion: v1
+data:
+  ladder: |-
+    {
+      "coresToReplicas": [],
+      "nodesToReplicas":
+      [
+        [1, 1],
+        [10, 2],
+        [100, 3],
+        [250, 4],
+        [500, 5],
+        [1000, 6],
+        [1500, 7],
+        [2000, 8]
+      ]
+    }
+kind: ConfigMap
+metadata:
+  name: calico-typha-horizontal-autoscaler
+  namespace: kube-system
+---
+apiVersion: v1
+data:
+  backup.sh: |-
+    #!/bin/sh
+    set -e
+
+    # This is the backup directory on ds-0
+    SERVER_BACKUP_DIR=/opt/out/backup
+
+    echo "Doing a full backup of userRoot backend to "
+    /opt/server/bin/backup --task \
+      --useSSL --trustAll \
+      --hostname ds-0.pingdirectory \
+      --port  \
+      --bindDN  \
+      --bindPasswordFile  \
+      --backupDirectory  \
+      --backendID userRoot \
+      --compress \
+      --retainPreviousFullBackupAge 1d
+
+    # FIXME: put kubectl in the image
+    echo "Installing kubectl"
+    curl https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl
+    chmod +x /usr/local/bin/kubectl
+
+    OLD_BACKUP_DIRS=$(find  -name backup-\* -type d)
+    echo "Old backup directories: "
+
+    NEW_BACKUP_DIR=/backup-$(date +%Y%m%d_%H%M%S)
+    mkdir -p 
+
+    echo "Copying backup from ds-0: to "
+    kubectl cp ds-0: 
+
+    echo "Changing current backup to point to "
+    CURRENT_BACKUP_DIR=/current
+    ln -snf  
+
+    echo "Removing old backup directories: "
+    echo  | xargs rm -rf
+
+    echo "Backup directory contents:"
+    ls -latr 
+
+    echo "Current backup contents:"
+    ls 
+kind: ConfigMap
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: backup-script
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: v1
+data:
+  ORCHESTRATION_TYPE: kubernetes
+  PING_IDENTITY_DEVOPS_KEY: 273b82bc-5d25-4a43-a163-099f313564ea
+  PING_IDENTITY_DEVOPS_USER: samirgandhi@pingidentity.com
+  SERVER_PROFILE_PATH: baseline/pingaccess
+  SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    app: ping-cloud
+    role: pingaccess
+  name: pingaccess-environment-variables-dh44b7ddmg
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: v1
+data:
+  ORCHESTRATION_TYPE: kubernetes
+  PING_IDENTITY_DEVOPS_KEY: 273b82bc-5d25-4a43-a163-099f313564ea
+  PING_IDENTITY_DEVOPS_USER: samirgandhi@pingidentity.com
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    app: ping-cloud
+    role: pingdataconsole
+  name: pingdataconsole-environment-variables-5dc7ggtcdb
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: v1
+data:
+  ADMIN_USER_PASSWORD_FILE: /usr/local/secrets/admin-user-password
+  LOCATION: Austin
+  MAX_HEAP_SIZE: 4g
+  ORCHESTRATION_TYPE: kubernetes
+  PING_IDENTITY_DEVOPS_KEY: 273b82bc-5d25-4a43-a163-099f313564ea
+  PING_IDENTITY_DEVOPS_USER: samirgandhi@pingidentity.com
+  ROOT_USER_PASSWORD_FILE: /usr/local/secrets/root-user-password
+  SERVER_PROFILE_PATH: baseline/pingdirectory
+  SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
+  USER_BASE_DN: dc=example,dc=com
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pingdirectory-environment-variables-hdf6kmb2bt
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: v1
+data:
+  ORCHESTRATION_TYPE: kubernetes
+  PING_IDENTITY_DEVOPS_KEY: 273b82bc-5d25-4a43-a163-099f313564ea
+  PING_IDENTITY_DEVOPS_USER: samirgandhi@pingidentity.com
+  SERVER_PROFILE_PATH: baseline/pingfederate
+  SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    app: ping-cloud
+    role: pingfederate
+  name: pingfederate-environment-variables-4tk5m2424f
+  namespace: ping-cloud-samirgandhi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret-logging
+  namespace: elastic-stack-logging
+stringData:
+  tls.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIC+DCCAeCgAwIBAgIJAJdLpmvIONuYMA0GCSqGSIb3DQEBCwUAMCUxIzAhBgNV
+    BAMMGmVrcy1wb2MuYXUxLnBpbmctbGFiLmNsb3VkMB4XDTE5MDkwNDIwNTk0OVoX
+    DTI5MDkwMTIwNTk0OVowJTEjMCEGA1UEAwwaZWtzLXBvYy5hdTEucGluZy1sYWIu
+    Y2xvdWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDATjdo71gI/HYE
+    tFKTzqp19pG8F8WzSTtyNQ5cn8+hCx2uQZ3ep9LjwieTWd9xjRXtnO03o4Mc5Zez
+    uUTJAlFmosLSQw+pdexJYkNMEri7D1wPRjztHG8Ei/uAyY7IL59qIB2efGU1a2Po
+    h+2SrHQUZyRkFpnAtZ9ZxRE4AXagtwuFEPUxubr9bP177a5Cm3CdiDOn1bC78ntD
+    BN/w/gaOvjVGjAjwRr7YjC9Hke6Nnlrbjiq5eUCCD5UXB0e2CP16tXljErAETQkB
+    tYkEvwIL95SidDnbDqEMVsZJ8WERABUIFjkyN3mwWZcCFYaqewoORZs7/DJbeIN6
+    EGpm3RnRAgMBAAGjKzApMCcGA1UdEQQgMB6CHCouZWtzLXBvYy5hdTEucGluZy1s
+    YWIuY2xvdWQwDQYJKoZIhvcNAQELBQADggEBAAAZaHXi0A7HsMsMw338F5x7thos
+    w+xrXRChc6u9Hj8sOXUoIFLDHOBAYakUlbmLqP6LItqcAFzp+wWx3dnZ+xvjB6eh
+    MqwqNPsNF3+NOQSqZ6vvBf8UdY5MyPnxL5/QERY54oeitehw83G0YtY2eUGR6db9
+    jSB6jNC0qhuLq/COHqvHtLOhcnfrDNJkGlVBYwu5dmH8UTULWeNUYH1+lFidDsCG
+    9fBbmk0EdJKIDE1a18D5RBJi4cNawC77y2ch9ZNEqqECBBDAfUQy8IMPWzy5+GHm
+    N5PgkG2+ndkxlPiTi24KT4RPXg+MhYzBQRXQu/virx5+mcYc9FH8BTU4ZcU=
+    -----END CERTIFICATE-----
+  tls.key: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDATjdo71gI/HYE
+    tFKTzqp19pG8F8WzSTtyNQ5cn8+hCx2uQZ3ep9LjwieTWd9xjRXtnO03o4Mc5Zez
+    uUTJAlFmosLSQw+pdexJYkNMEri7D1wPRjztHG8Ei/uAyY7IL59qIB2efGU1a2Po
+    h+2SrHQUZyRkFpnAtZ9ZxRE4AXagtwuFEPUxubr9bP177a5Cm3CdiDOn1bC78ntD
+    BN/w/gaOvjVGjAjwRr7YjC9Hke6Nnlrbjiq5eUCCD5UXB0e2CP16tXljErAETQkB
+    tYkEvwIL95SidDnbDqEMVsZJ8WERABUIFjkyN3mwWZcCFYaqewoORZs7/DJbeIN6
+    EGpm3RnRAgMBAAECggEATKfhFocxxIM+WCm5MQoUkOk0tpGTUSBD/gaALxPVJBDW
+    R/wH/hVPz1I5jFcq5oyizRDczmzzerVaf12+uZGe+RawKjhpKdfD1IzC3rQnxwkc
+    XUpWRv4qktlp67Bspge1uAwNQnu7rEuei7aDURBFRUzICM2phFPhrVsMvhJ3QyCC
+    793mnYCJy/ZDvPqM5L2Zx46EZ8tnRDj+m3kfjtWnpJ6ea4DQzDbkceIUnpCZc9Yk
+    CkrND59LU9HemUZlEGfFS+DJ2BYI325cPgPGIJ7epr/VCX9xwY8IHhEClJHt96qx
+    qm/Dq3DnRsmf13qJsaCvkq8LAvgFwnYYQOSzE/xlQQKBgQDpGOkelCOqseQyeZ7X
+    oOGbTQ27Jtf48XXDn697zr53lguo+4A7W4sboAF1dOAa40cpdfGs6D1t6cZtZ5WR
+    9xIefXBMLlrybJ5qdR0fUNIgu8sPB2fsv5HVfwx3Q9sTUp6m4HPRyczvV+jF1BAH
+    aThw2n98iKddiOGrtiL+GZslpQKBgQDTM0WGnnTy0EHPF84YS3dyaES7KA2uOvtg
+    YSGe2jDp2T0fB0fj39a3enyhH0ZixZZDYmiPlt1n3kf0lHdo7iZwus9K1K9Dtmus
+    Q8QT5S/gRzZm3JTzm/hAWafoCTfK9u+0bNftZK/QtVSRqzINqI/YZSMomQoI+GqZ
+    69xLQF3jvQKBgDApYnlb+GabbN/0+xnodtTkvdKOew9HrKJnyxVUqUwCJ5SZqmwZ
+    RQvHKqX/KRLFJP3vDalBLvgX1lTikyfemdLM7jf/V/FA+hZa7lJ7G3+B7bnEOPfU
+    uSgYoRW/YnOCnZ8zPxr4jCxjyIefglRVrEC9FJxBi/sqfh5BesdvuPu1AoGBANHW
+    TSu1YAin9dqmkjP9Nw5Kno88+mqzW3KkztyfeJ2/I0Ui3MCBczoUzqLfCfW0ztjg
+    e3a+s/gxF1jf8cwlYbf7Q13b9s7V/iDHq5cAzRKObnTAkJWBz6NP8M1P60kTE5I1
+    2kuZED3TC9U3PKHpahHcWpRJiXjkKDYJ63Qw3ZgZAoGADmZ8b/+XyQ8QyyIRUgpJ
+    mu+pBXD/V0xzCZSjc0tPXfKJhAMl96aM8L25a3xtEorI+iv79YxX5cjWS31fs9Az
+    yMnOStMT1CCFAK9NgrQd8QgATlho+CdbQ39/TKERMJskaym8dHeJHMdh/j7b+ZUb
+    dVNIj646N1ovE+dxS/6JrGY=
+    -----END PRIVATE KEY-----
+type: kubernetes.io/tls
+---
+apiVersion: v1
+data:
+  admin-user-password: MkZlZGVyYXRlTTByZQo=
+  root-user-password: MkZlZGVyYXRlTTByZQo=
+kind: Secret
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: passwords
+  namespace: ping-cloud-samirgandhi
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: ping-cloud
+  name: tls-secret
+  namespace: ping-cloud-samirgandhi
+stringData:
+  tls.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIC+DCCAeCgAwIBAgIJAJdLpmvIONuYMA0GCSqGSIb3DQEBCwUAMCUxIzAhBgNV
+    BAMMGmVrcy1wb2MuYXUxLnBpbmctbGFiLmNsb3VkMB4XDTE5MDkwNDIwNTk0OVoX
+    DTI5MDkwMTIwNTk0OVowJTEjMCEGA1UEAwwaZWtzLXBvYy5hdTEucGluZy1sYWIu
+    Y2xvdWQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDATjdo71gI/HYE
+    tFKTzqp19pG8F8WzSTtyNQ5cn8+hCx2uQZ3ep9LjwieTWd9xjRXtnO03o4Mc5Zez
+    uUTJAlFmosLSQw+pdexJYkNMEri7D1wPRjztHG8Ei/uAyY7IL59qIB2efGU1a2Po
+    h+2SrHQUZyRkFpnAtZ9ZxRE4AXagtwuFEPUxubr9bP177a5Cm3CdiDOn1bC78ntD
+    BN/w/gaOvjVGjAjwRr7YjC9Hke6Nnlrbjiq5eUCCD5UXB0e2CP16tXljErAETQkB
+    tYkEvwIL95SidDnbDqEMVsZJ8WERABUIFjkyN3mwWZcCFYaqewoORZs7/DJbeIN6
+    EGpm3RnRAgMBAAGjKzApMCcGA1UdEQQgMB6CHCouZWtzLXBvYy5hdTEucGluZy1s
+    YWIuY2xvdWQwDQYJKoZIhvcNAQELBQADggEBAAAZaHXi0A7HsMsMw338F5x7thos
+    w+xrXRChc6u9Hj8sOXUoIFLDHOBAYakUlbmLqP6LItqcAFzp+wWx3dnZ+xvjB6eh
+    MqwqNPsNF3+NOQSqZ6vvBf8UdY5MyPnxL5/QERY54oeitehw83G0YtY2eUGR6db9
+    jSB6jNC0qhuLq/COHqvHtLOhcnfrDNJkGlVBYwu5dmH8UTULWeNUYH1+lFidDsCG
+    9fBbmk0EdJKIDE1a18D5RBJi4cNawC77y2ch9ZNEqqECBBDAfUQy8IMPWzy5+GHm
+    N5PgkG2+ndkxlPiTi24KT4RPXg+MhYzBQRXQu/virx5+mcYc9FH8BTU4ZcU=
+    -----END CERTIFICATE-----
+  tls.key: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDATjdo71gI/HYE
+    tFKTzqp19pG8F8WzSTtyNQ5cn8+hCx2uQZ3ep9LjwieTWd9xjRXtnO03o4Mc5Zez
+    uUTJAlFmosLSQw+pdexJYkNMEri7D1wPRjztHG8Ei/uAyY7IL59qIB2efGU1a2Po
+    h+2SrHQUZyRkFpnAtZ9ZxRE4AXagtwuFEPUxubr9bP177a5Cm3CdiDOn1bC78ntD
+    BN/w/gaOvjVGjAjwRr7YjC9Hke6Nnlrbjiq5eUCCD5UXB0e2CP16tXljErAETQkB
+    tYkEvwIL95SidDnbDqEMVsZJ8WERABUIFjkyN3mwWZcCFYaqewoORZs7/DJbeIN6
+    EGpm3RnRAgMBAAECggEATKfhFocxxIM+WCm5MQoUkOk0tpGTUSBD/gaALxPVJBDW
+    R/wH/hVPz1I5jFcq5oyizRDczmzzerVaf12+uZGe+RawKjhpKdfD1IzC3rQnxwkc
+    XUpWRv4qktlp67Bspge1uAwNQnu7rEuei7aDURBFRUzICM2phFPhrVsMvhJ3QyCC
+    793mnYCJy/ZDvPqM5L2Zx46EZ8tnRDj+m3kfjtWnpJ6ea4DQzDbkceIUnpCZc9Yk
+    CkrND59LU9HemUZlEGfFS+DJ2BYI325cPgPGIJ7epr/VCX9xwY8IHhEClJHt96qx
+    qm/Dq3DnRsmf13qJsaCvkq8LAvgFwnYYQOSzE/xlQQKBgQDpGOkelCOqseQyeZ7X
+    oOGbTQ27Jtf48XXDn697zr53lguo+4A7W4sboAF1dOAa40cpdfGs6D1t6cZtZ5WR
+    9xIefXBMLlrybJ5qdR0fUNIgu8sPB2fsv5HVfwx3Q9sTUp6m4HPRyczvV+jF1BAH
+    aThw2n98iKddiOGrtiL+GZslpQKBgQDTM0WGnnTy0EHPF84YS3dyaES7KA2uOvtg
+    YSGe2jDp2T0fB0fj39a3enyhH0ZixZZDYmiPlt1n3kf0lHdo7iZwus9K1K9Dtmus
+    Q8QT5S/gRzZm3JTzm/hAWafoCTfK9u+0bNftZK/QtVSRqzINqI/YZSMomQoI+GqZ
+    69xLQF3jvQKBgDApYnlb+GabbN/0+xnodtTkvdKOew9HrKJnyxVUqUwCJ5SZqmwZ
+    RQvHKqX/KRLFJP3vDalBLvgX1lTikyfemdLM7jf/V/FA+hZa7lJ7G3+B7bnEOPfU
+    uSgYoRW/YnOCnZ8zPxr4jCxjyIefglRVrEC9FJxBi/sqfh5BesdvuPu1AoGBANHW
+    TSu1YAin9dqmkjP9Nw5Kno88+mqzW3KkztyfeJ2/I0Ui3MCBczoUzqLfCfW0ztjg
+    e3a+s/gxF1jf8cwlYbf7Q13b9s7V/iDHq5cAzRKObnTAkJWBz6NP8M1P60kTE5I1
+    2kuZED3TC9U3PKHpahHcWpRJiXjkKDYJ63Qw3ZgZAoGADmZ8b/+XyQ8QyyIRUgpJ
+    mu+pBXD/V0xzCZSjc0tPXfKJhAMl96aM8L25a3xtEorI+iv79YxX5cjWS31fs9Az
+    yMnOStMT1CCFAK9NgrQd8QgATlho+CdbQ39/TKERMJskaym8dHeJHMdh/j7b+ZUb
+    dVNIj646N1ovE+dxS/6JrGY=
+    -----END PRIVATE KEY-----
+type: kubernetes.io/tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: elasticsearch
+  name: elasticsearch
+  namespace: elastic-stack-logging
+spec:
+  clusterIP: None
+  ports:
+  - name: rest
+    port: 9200
+  - name: inter-node
+    port: 9300
+  selector:
+    app: elasticsearch
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kibana
+  name: kibana
+  namespace: elastic-stack-logging
+spec:
+  ports:
+  - name: http
+    port: 5601
+  selector:
+    app: kibana
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: ingress-nginx
+  namespace: ingress-nginx-private
+spec:
+  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  - name: https
+    port: 443
+    targetPort: https
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: ingress-nginx
+  namespace: ingress-nginx-public
+spec:
+  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  - name: https
+    port: 443
+    targetPort: https
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: calico-typha
+  name: calico-typha
+  namespace: kube-system
+spec:
+  ports:
+  - name: calico-typha
+    port: 5473
+    protocol: TCP
+    targetPort: calico-typha
+  selector:
+    k8s-app: calico-typha
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ping-cloud
+    role: httpbin
+  name: httpbin
+  namespace: ping-cloud-samirgandhi
+spec:
+  ports:
+  - name: httpbin
+    port: 80
+  selector:
+    app: ping-cloud
+    role: httpbin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingaccess
+  name: pingaccess
+  namespace: ping-cloud-samirgandhi
+spec:
+  ports:
+  - name: pa-admin
+    port: 9000
+  - name: pa-runtime
+    port: 443
+  selector:
+    app: ping-cloud
+    role: pingaccess
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdataconsole
+  name: pingdataconsole-service
+  namespace: ping-cloud-samirgandhi
+spec:
+  ports:
+  - name: http
+    port: 8080
+  selector:
+    app: ping-cloud
+    role: pingdataconsole
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pingdirectory
+  namespace: ping-cloud-samirgandhi
+spec:
+  clusterIP: None
+  ports:
+  - name: ldap
+    port: 389
+  - name: ldaps
+    port: 636
+  selector:
+    app: ping-cloud
+    role: pingdirectory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingfederateconsole
+  name: pingfederateconsole
+  namespace: ping-cloud-samirgandhi
+spec:
+  ports:
+  - name: pf-admin
+    port: 9999
+  selector:
+    app: ping-cloud
+    role: pingfederate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingfederate
+  name: pingfederate
+  namespace: ping-cloud-samirgandhi
+spec:
+  ports:
+  - name: pf-runtime
+    port: 9031
+  selector:
+    app: ping-cloud
+    role: pingfederate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kibana
+  name: kibana
+  namespace: elastic-stack-logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - env:
+        - name: ELASTICSEARCH_URL
+          value: http://elasticsearch:9200
+        image: docker.elastic.co/kibana/kibana:7.2.0
+        name: kibana
+        ports:
+        - containerPort: 5601
+          name: http
+        resources:
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-private
+  name: nginx-ingress-controller
+  namespace: ingress-nginx-private
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+      app.kubernetes.io/role: ingress-nginx-private
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/role: ingress-nginx-private
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --configmap=$(POD_NAMESPACE)/nginx-configuration
+        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+        - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+        - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+        - --annotations-prefix=nginx.ingress.kubernetes.io
+        - --ingress-class=nginx-private
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.25.1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: nginx-ingress-controller
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          runAsUser: 33
+      serviceAccountName: nginx-ingress-serviceaccount
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/role: ingress-nginx-public
+  name: nginx-ingress-controller
+  namespace: ingress-nginx-public
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+      app.kubernetes.io/role: ingress-nginx-public
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+        app.kubernetes.io/role: ingress-nginx-public
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --configmap=$(POD_NAMESPACE)/nginx-configuration
+        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+        - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+        - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+        - --annotations-prefix=nginx.ingress.kubernetes.io
+        - --ingress-class=nginx-public
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.25.1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: nginx-ingress-controller
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          runAsUser: 33
+      serviceAccountName: nginx-ingress-serviceaccount
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: calico-typha
+  name: calico-typha
+  namespace: kube-system
+spec:
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      k8s-app: calico-typha
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+      labels:
+        k8s-app: calico-typha
+    spec:
+      containers:
+      - env:
+        - name: FELIX_INTERFACEPREFIX
+          value: eni
+        - name: TYPHA_LOGFILEPATH
+          value: none
+        - name: TYPHA_LOGSEVERITYSYS
+          value: none
+        - name: TYPHA_LOGSEVERITYSCREEN
+          value: info
+        - name: TYPHA_PROMETHEUSMETRICSENABLED
+          value: "true"
+        - name: TYPHA_CONNECTIONREBALANCINGMODE
+          value: kubernetes
+        - name: TYPHA_PROMETHEUSMETRICSPORT
+          value: "9093"
+        - name: TYPHA_DATASTORETYPE
+          value: kubernetes
+        - name: TYPHA_MAXCONNECTIONSLOWERLIMIT
+          value: "1"
+        - name: TYPHA_HEALTHENABLED
+          value: "true"
+        - name: FELIX_IPTABLESMANGLEALLOWACTION
+          value: Return
+        image: quay.io/calico/typha:v3.3.6
+        livenessProbe:
+          exec:
+            command:
+            - calico-typha
+            - check
+            - liveness
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        name: calico-typha
+        ports:
+        - containerPort: 5473
+          name: calico-typha
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - calico-typha
+            - check
+            - readiness
+          periodSeconds: 10
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      serviceAccountName: calico-node
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: calico-typha-autoscaler
+  name: calico-typha-horizontal-autoscaler
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: calico-typha-autoscaler
+  template:
+    metadata:
+      labels:
+        k8s-app: calico-typha-autoscaler
+    spec:
+      containers:
+      - command:
+        - /cluster-proportional-autoscaler
+        - --namespace=kube-system
+        - --configmap=calico-typha-horizontal-autoscaler
+        - --target=deployment/calico-typha
+        - --logtostderr=true
+        - --v=2
+        image: k8s.gcr.io/cluster-proportional-autoscaler-amd64:1.1.2
+        name: autoscaler
+        resources:
+          limits:
+            cpu: 10m
+          requests:
+            cpu: 10m
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      serviceAccountName: typha-cpha
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ping-cloud
+    role: httpbin
+  name: httpbin
+  namespace: ping-cloud-samirgandhi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-cloud
+      role: httpbin
+  template:
+    metadata:
+      labels:
+        app: ping-cloud
+        role: httpbin
+      name: httpbin
+    spec:
+      containers:
+      - image: kennethreitz/httpbin
+        name: httpbin
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingaccess
+  name: pingaccess
+  namespace: ping-cloud-samirgandhi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-cloud
+      role: pingaccess
+  template:
+    metadata:
+      annotations:
+        lastUpdateTime: NA
+      labels:
+        app: ping-cloud
+        role: pingaccess
+      name: pingaccess
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: pingaccess-environment-variables-dh44b7ddmg
+        image: pingidentity/pingaccess:5.3.0-edge
+        imagePullPolicy: Always
+        name: pingaccess
+        ports:
+        - containerPort: 9000
+          name: pa-admin
+        - containerPort: 443
+          name: pa-runtime
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdataconsole
+  name: pingdataconsole
+  namespace: ping-cloud-samirgandhi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-cloud
+      role: pingdataconsole
+  template:
+    metadata:
+      annotations:
+        lastUpdateTime: NA
+      labels:
+        app: ping-cloud
+        role: pingdataconsole
+      name: pingdataconsole
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: pingdataconsole-environment-variables-5dc7ggtcdb
+        image: pingidentity/pingdataconsole:edge
+        name: pingdataconsole
+        ports:
+        - containerPort: 8080
+          name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingfederate
+  name: pingfederate
+  namespace: ping-cloud-samirgandhi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-cloud
+      role: pingfederate
+  template:
+    metadata:
+      annotations:
+        lastUpdateTime: NA
+      labels:
+        app: ping-cloud
+        role: pingfederate
+      name: pingfederate
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: pingfederate-environment-variables-4tk5m2424f
+        image: pingidentity/pingfederate:9.3.0-edge
+        imagePullPolicy: Always
+        name: pingfederate
+        ports:
+        - containerPort: 9999
+          name: pf-admin
+        - containerPort: 9031
+          name: pf-runtime
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: external-dns
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: external-dns
+    spec:
+      containers:
+      - args:
+        - --source=service
+        - --source=ingress
+        - --log-level=debug
+        - --provider=aws
+        - --policy=upsert-only
+        - --aws-zone-type=public
+        - --registry=txt
+        image: registry.opensource.zalan.do/teapot/external-dns:latest
+        name: external-dns
+      serviceAccountName: external-dns
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-cluster
+  namespace: elastic-stack-logging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: elasticsearch
+  serviceName: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - env:
+        - name: cluster.name
+          value: k8s-logs
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: discovery.seed_hosts
+          value: es-cluster-0.elasticsearch,es-cluster-1.elasticsearch,es-cluster-2.elasticsearch
+        - name: cluster.initial_master_nodes
+          value: es-cluster-0,es-cluster-1,es-cluster-2
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+        name: elasticsearch
+        ports:
+        - containerPort: 9200
+          name: rest
+          protocol: TCP
+        - containerPort: 9300
+          name: inter-node
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: data
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - chown -R 1000:1000 /usr/share/elasticsearch/data
+        image: busybox
+        name: fix-permissions
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: data
+      - command:
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
+        image: busybox
+        name: increase-vm-max-map
+        securityContext:
+          privileged: true
+      - command:
+        - sh
+        - -c
+        - ulimit -n 65536
+        image: busybox
+        name: increase-fd-ulimit
+        securityContext:
+          privileged: true
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app: elasticsearch
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: elasticsearch-gp2
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: ds
+  namespace: ping-cloud-samirgandhi
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-cloud
+      role: pingdirectory
+  serviceName: pingdirectory
+  template:
+    metadata:
+      annotations:
+        lastUpdateTime: NA
+      labels:
+        app: ping-cloud
+        role: pingdirectory
+    spec:
+      containers:
+      - env:
+        - name: K8S_STATEFUL_SET_NAME
+          value: ds
+        - name: K8S_STATEFUL_SET_SERVICE_NAME
+          value: pingdirectory
+        - name: MAX_HEAP_SIZE
+          value: 8g
+        - name: UNBOUNDID_JAVA_ARGS
+          value: -client -Xmx8g -Xms8g
+        envFrom:
+        - configMapRef:
+            name: pingdirectory-environment-variables-hdf6kmb2bt
+        image: pingidentity/pingdirectory:edge
+        imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /opt/staging/hooks/90-shutdown-sequence.sh
+        livenessProbe:
+          exec:
+            command:
+            - liveness.sh
+          failureThreshold: 10
+          initialDelaySeconds: 600
+          periodSeconds: 30
+        name: ds
+        ports:
+        - containerPort: 389
+          name: ldap
+        - containerPort: 636
+          name: ldaps
+        readinessProbe:
+          exec:
+            command:
+            - liveness.sh
+          failureThreshold: 120
+          periodSeconds: 30
+        resources:
+          limits:
+            cpu: "2"
+            memory: 8Gi
+          requests:
+            cpu: "2"
+            memory: 8Gi
+        volumeMounts:
+        - mountPath: /opt/out
+          name: out-dir
+        - mountPath: /usr/local/secrets
+          name: passwords
+          readOnly: true
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - name: passwords
+        secret:
+          defaultMode: 256
+          secretName: passwords
+      - name: out-dir
+        persistentVolumeClaim:
+          claimName: out-dir
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app: ping-cloud
+        role: pingdirectory
+      name: out-dir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: pingdirectory-io1
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: ds-periodic-backup
+  namespace: ping-cloud-samirgandhi
+spec:
+  jobTemplate:
+    metadata:
+      labels:
+        app: ping-cloud
+        role: pingdirectory
+    spec:
+      template:
+        metadata:
+          labels:
+            app: ping-cloud
+            role: pingdirectory
+        spec:
+          containers:
+          - command:
+            - /opt/in/backup.sh
+            env:
+            - name: BACKUP_DIR
+              value: /pd_backups
+            image: pingidentity/pingdirectory:edge
+            name: ds-backup
+            volumeMounts:
+            - mountPath: /usr/local/secrets
+              name: passwords
+              readOnly: true
+            - mountPath: /pd_backups
+              name: backup-volume
+            - mountPath: /opt/in
+              name: backup-script
+          restartPolicy: OnFailure
+          serviceAccount: pd-backup-serviceaccount
+          volumes:
+          - name: passwords
+            secret:
+              defaultMode: 256
+              secretName: passwords
+          - configMap:
+              defaultMode: 511
+              name: backup-script
+            name: backup-script
+          - name: backup-volume
+            persistentVolumeClaim:
+              claimName: pd-backup-pvc
+  schedule: '* */6 * * *'
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    k8s-app: calico-typha
+  name: calico-typha
+  namespace: kube-system
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: calico-typha
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: fluentd
+  name: fluentd
+  namespace: elastic-stack-logging
+spec:
+  selector:
+    matchLabels:
+      app: fluentd
+  template:
+    metadata:
+      labels:
+        app: fluentd
+    spec:
+      containers:
+      - env:
+        - name: FLUENT_ELASTICSEARCH_HOST
+          value: elasticsearch.elastic-stack-logging.svc.cluster.local
+        - name: FLUENT_ELASTICSEARCH_PORT
+          value: "9200"
+        - name: FLUENT_ELASTICSEARCH_SCHEME
+          value: http
+        - name: FLUENTD_SYSTEMD_CONF
+          value: disable
+        image: fluent/fluentd-kubernetes-daemonset:v1.4.2-debian-elasticsearch-1.1
+        name: fluentd
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - mountPath: /fluentd/etc/conf.d
+          name: kubernetes-namespace-logging
+          readOnly: true
+        - mountPath: /var/log
+          name: varlog
+        - mountPath: /var/lib/docker/containers
+          name: varlibdockercontainers
+          readOnly: true
+      serviceAccount: fluentd
+      serviceAccountName: fluentd
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      volumes:
+      - configMap:
+          name: kubernetes-namespace-logging
+        name: kubernetes-namespace-logging
+      - hostPath:
+          path: /var/log
+        name: varlog
+      - hostPath:
+          path: /var/lib/docker/containers
+        name: varlibdockercontainers
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: calico-node
+  name: calico-node
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: calico-node
+  template:
+    metadata:
+      labels:
+        k8s-app: calico-node
+    spec:
+      containers:
+      - env:
+        - name: DATASTORE_TYPE
+          value: kubernetes
+        - name: FELIX_INTERFACEPREFIX
+          value: eni
+        - name: FELIX_LOGSEVERITYSCREEN
+          value: info
+        - name: CALICO_NETWORKING_BACKEND
+          value: none
+        - name: CLUSTER_TYPE
+          value: k8s,ecs
+        - name: CALICO_DISABLE_FILE_LOGGING
+          value: "true"
+        - name: FELIX_TYPHAK8SSERVICENAME
+          value: calico-typha
+        - name: FELIX_DEFAULTENDPOINTTOHOSTACTION
+          value: ACCEPT
+        - name: FELIX_IPTABLESMANGLEALLOWACTION
+          value: Return
+        - name: FELIX_IPV6SUPPORT
+          value: "false"
+        - name: WAIT_FOR_DATASTORE
+          value: "true"
+        - name: FELIX_LOGSEVERITYSYS
+          value: none
+        - name: FELIX_PROMETHEUSMETRICSENABLED
+          value: "true"
+        - name: NO_DEFAULT_POOLS
+          value: "true"
+        - name: NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: IP
+          value: ""
+        - name: FELIX_HEALTHENABLED
+          value: "true"
+        image: quay.io/calico/node:v3.3.6
+        livenessProbe:
+          failureThreshold: 6
+          httpGet:
+            host: localhost
+            path: /liveness
+            port: 9099
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        name: calico-node
+        readinessProbe:
+          exec:
+            command:
+            - /bin/calico-node
+            - -felix-ready
+          periodSeconds: 10
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /run/xtables.lock
+          name: xtables-lock
+          readOnly: false
+        - mountPath: /var/run/calico
+          name: var-run-calico
+          readOnly: false
+        - mountPath: /var/lib/calico
+          name: var-lib-calico
+          readOnly: false
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      priorityClassName: system-node-critical
+      serviceAccountName: calico-node
+      terminationGracePeriodSeconds: 0
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /lib/modules
+        name: lib-modules
+      - hostPath:
+          path: /var/run/calico
+        name: var-run-calico
+      - hostPath:
+          path: /var/lib/calico
+        name: var-lib-calico
+      - hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
+        name: xtables-lock
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-private
+  labels:
+    app: kibana
+  name: kibana-ingress
+  namespace: elastic-stack-logging
+spec:
+  rules:
+  - host: logs.d1.ping-devops-program.com
+    http:
+      paths:
+      - backend:
+          serviceName: kibana
+          servicePort: 5601
+        path: /
+  tls:
+  - hosts:
+    - logs.d1.ping-devops-program.com
+    secretName: tls-secret-logging
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-private
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  labels:
+    app: ping-cloud
+    role: pingaccess
+  name: pingaccess-admin-ingress
+  namespace: ping-cloud-samirgandhi
+spec:
+  rules:
+  - host: pingaccess-admin-samirgandhi.d1.ping-devops-program.com
+    http:
+      paths:
+      - backend:
+          serviceName: pingaccess
+          servicePort: 9000
+        path: /
+  tls:
+  - hosts:
+    - pingaccess-admin-samirgandhi.d1.ping-devops-program.com
+    secretName: tls-secret
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-public
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  labels:
+    app: ping-cloud
+    role: pingaccess
+  name: pingaccess-ingress
+  namespace: ping-cloud-samirgandhi
+spec:
+  rules:
+  - host: pingaccess-samirgandhi.d1.ping-devops-program.com
+    http:
+      paths:
+      - backend:
+          serviceName: pingaccess
+          servicePort: 443
+        path: /
+  tls:
+  - hosts:
+    - pingaccess-samirgandhi.d1.ping-devops-program.com
+    secretName: tls-secret
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-private
+  labels:
+    app: ping-cloud
+    role: pingdataconsole
+  name: pingdataconsole-ingress
+  namespace: ping-cloud-samirgandhi
+spec:
+  rules:
+  - host: pingdataconsole-samirgandhi.d1.ping-devops-program.com
+    http:
+      paths:
+      - backend:
+          serviceName: pingdataconsole-service
+          servicePort: 8080
+        path: /console
+  tls:
+  - hosts:
+    - pingdataconsole-samirgandhi.d1.ping-devops-program.com
+    secretName: tls-secret
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-private
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  labels:
+    app: ping-cloud
+    role: pingfederate
+  name: pingfederate-admin-ingress
+  namespace: ping-cloud-samirgandhi
+spec:
+  rules:
+  - host: pingfederate-admin-samirgandhi.d1.ping-devops-program.com
+    http:
+      paths:
+      - backend:
+          serviceName: pingfederate
+          servicePort: 9999
+        path: /
+  tls:
+  - hosts:
+    - pingfederate-admin-samirgandhi.d1.ping-devops-program.com
+    secretName: tls-secret
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-public
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  labels:
+    app: ping-cloud
+    role: pingfederate
+  name: pingfederate-ingress
+  namespace: ping-cloud-samirgandhi
+spec:
+  rules:
+  - host: pingfederate-samirgandhi.d1.ping-devops-program.com
+    http:
+      paths:
+      - backend:
+          serviceName: pingfederate
+          servicePort: 9031
+        path: /
+  tls:
+  - hosts:
+    - pingfederate-samirgandhi.d1.ping-devops-program.com
+    secretName: tls-secret
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: ping-cloud
+    role: pingdirectory
+  name: pd-backup-pvc
+  namespace: ping-cloud-samirgandhi
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: pingdirectory-io1

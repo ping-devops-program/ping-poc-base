@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: directory.perf.ping-poc-hunr.com #configure this
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "20"
+  labels:
+    app: pingdirectory
+    company: PingIdentity
+  name: pingdirectory
+  namespace: perf
+spec:
+  loadBalancerSourceRanges:
+  - 75.80.23.87/32
+  - 71.148.12.8/32
+  ports:
+  - name: ldap
+    nodePort: 32566
+    port: 389
+    protocol: TCP
+    targetPort: 389
+  - name: ldaps
+    nodePort: 31913
+    port: 636
+    protocol: TCP
+    targetPort: 636
+  - name: https
+    nodePort: 31427
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: pingdirectory
+    company: PingIdentity
+  sessionAffinity: None
+  type: LoadBalancer

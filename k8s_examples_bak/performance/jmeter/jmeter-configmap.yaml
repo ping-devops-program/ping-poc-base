@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  GIT_PATH: server-profiles/jmeter
+  GIT_URL: https://ping-poc-hunr:3699c7dbab6012237e884065e43b11ae73005089@github.com/ping-devops-program/ping-poc-intuit
+  GIT_BRANCH: perf
+kind: ConfigMap
+metadata:
+  # annotations:
+  #   kubectl.kubernetes.io/last-applied-configuration: |
+  #     {"apiVersion":"v1","data":{"GIT_PATH":"server-profiles/jmeter","GIT_URL":"https://ping-poc-hunr:3699c7dbab6012237e884065e43b11ae73005089@github.com/ping-devops-program/ping-poc-intuit"},"kind":"ConfigMap","metadata":{"annotations":{},"labels":{"company":"PingIdentity"},"name":"jmeter-configmap-k2b6chgff9","namespace":"perf"}}
+  # creationTimestamp: "2019-08-23T05:49:22Z"
+  labels:
+    company: PingIdentity
+  name: jmeter-configmap-perf-k2b6chgff9s
+  namespace: perf

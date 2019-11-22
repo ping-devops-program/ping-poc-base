@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  BASEPATH: /dashboard
+  INFLUXDB_URL: http://influxdb:8086
+  PUBLIC_URL: http://localhost:8888
+  RESOURCES_PATH: /usr/share/chronograf/resources
+kind: ConfigMap
+metadata:
+  labels:
+    company: PingIdentity
+  name: chronograf-configmap-74ddh5hckc
+  namespace: perf

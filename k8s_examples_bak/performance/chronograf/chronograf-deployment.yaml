@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: chronograf
+    company: PingIdentity
+  name: chronograf
+  namespace: perf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chronograf
+      company: PingIdentity
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: chronograf
+        company: PingIdentity
+      name: chronograf
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: alpha.eksctl.io/nodegroup-name
+                operator: In
+                values:
+                - jmeter-large
+      containers:
+      - env:
+        - name: INFLUXDB_DATABASE
+          value: jmeter
+        envFrom:
+        - secretRef:
+            name: influxdb-creds-k4kf8h67mk
+        - configMapRef:
+            name: chronograf-configmap-74ddh5hckc
+        image: chronograf:alpine
+        imagePullPolicy: IfNotPresent
+        name: chronograf
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2
+            memory: 3Gi
+          requests:
+            cpu: 1500m
+            memory: 1536Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/chronograf
+          name: var-lib-chronograf
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: var-lib-chronograf
+        persistentVolumeClaim:
+          claimName: chronograf

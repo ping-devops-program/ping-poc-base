@@ -1,0 +1,13 @@
+- op: replace
+  path: /spec/tls/0/hosts/0
+  value: access.${TENANT_DOMAIN}
+- op: replace
+  path: /spec/tls/0/hosts/1
+  value: accessconsole.${TENANT_DOMAIN}
+
+- op: replace
+  path: /spec/rules/0/host
+  value: access.${TENANT_DOMAIN}
+- op: replace
+  path: /spec/rules/1/host
+  value: accessconsole.${TENANT_DOMAIN}  

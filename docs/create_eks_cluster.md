@@ -9,8 +9,8 @@ Kubernetes requires a cluster for deployments. This will walk through creating a
       pip3 install awscli --upgrade --user
       ```
 
-  2. kubectl:
-https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos
+  2. kubectl: https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos
+      
       ```
       curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
 
@@ -22,7 +22,6 @@ https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos
 
       kubectl version
       ```
-      > make sure the file at `$HOME/.kube/config` is valid, you may have to delete and recreate it. 
 
   3. eksctl
       ```

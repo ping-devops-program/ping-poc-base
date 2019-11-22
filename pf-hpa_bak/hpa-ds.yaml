@@ -1,0 +1,27 @@
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ds
+  labels:
+    app: pd-label
+  annotations:
+    metric-config.pods.recent-worker-thread-percent-busy.json-path/json-key: "$._embedded.entries[0].recent-worker-thread-percent-busy"
+    metric-config.pods.recent-worker-thread-percent-busy.json-path/path: /directory/v1/cn=Work Queue,cn=monitor/subtree?searchScope=wholesubtree
+    metric-config.pods.recent-worker-thread-percent-busy.json-path/port: "443"
+    metric-config.pods.recent-worker-thread-percent-busy.json-path/protocol: "https"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: ds
+  # volumes:
+  #   secret:
+  #     secretName: passwords
+  #     defaultMode: 256
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metricName: recent-worker-thread-percent-busy
+      targetAverageValue: 50

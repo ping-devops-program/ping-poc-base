@@ -4,8 +4,8 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: ping-poc-base
-  region: us-west-2
+  name: ping-devops-gte
+  region: us-east-2
 
 # vpc:
 #   id: "vpc-0ff086f1cae7dea2f"  # (optional, must match VPC ID used for each subnet below)
@@ -20,10 +20,10 @@ metadata:
 #         id: "subnet-05d8af2ff3770af6a"
 
 nodeGroups:
-  - name: base-nodegroup
-    instanceType: m5.2xlarge
-    desiredCapacity: 2
-    availabilityZones: ["us-west-2d", "us-west-2b","us-west-2c"]
+  - name: m5ad4xl
+    instanceType: m5ad.4xlarge
+    desiredCapacity: 8
+    availabilityZones: ["us-east-2a", "us-east-2b","us-east-2c"]
     iam:
       withAddonPolicies:
         imageBuilder: true

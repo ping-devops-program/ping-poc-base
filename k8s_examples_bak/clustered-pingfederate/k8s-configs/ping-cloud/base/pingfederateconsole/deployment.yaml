@@ -1,0 +1,28 @@
+# This defines the pingfederateconsole deployment.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingfederateconsole
+  labels:
+    app: pingfederateconsole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pingfederateconsole
+  template:
+    metadata:
+      name: pingfederateconsole
+      labels:
+        app: pingfederateconsole
+    spec:
+      containers:
+      - name: pingfederateconsole
+        image: pingidentity/pingfederate:9.3.0-edge
+        ports:
+        - containerPort: 9999
+          name: pf-console
+        envFrom:
+          - configMapRef:
+              name: pingfederateconsole-environment-variables

@@ -1,9 +1,0 @@
-access.dev.ping-poc-base.com PA_HOSTNAME
-access.poc.ping-poc-base.com PA_HOSTNAME
-access.perf.ping-poc-base.com PA_HOSTNAME
-federate.dev.ping-poc-base.com PF_HOSTNAME
-federate.poc.ping-poc-base.com PF_HOSTNAME
-federate.perf.ping-poc-base.com PF_HOSTNAME
-directory.poc.ping-poc-base.com PD_HOSTNAME
-directory.perf.ping-poc-base.com PD_HOSTNAME
-directory.dev.ping-poc-base.com PD_HOSTNAME
