@@ -35,6 +35,10 @@ Kubernetes requires a cluster for deployments. This will walk through creating a
 
       brew install weaveworks/tap/eksctl
       ```
+  4. kubectx
+      ```
+      brew install kubectx
+      ```
 
 ### 2. Get AWS access key/secret.
 > Note: If you have an admin key and secret already, skip to step 3.
@@ -46,7 +50,7 @@ Kubernetes requires a cluster for deployments. This will walk through creating a
 ```
 aws configure --profile aws_admin
 ```
-Default Region: us-west-2
+Default Region: {leave_empty}
 Default output format: json
 
 Then, set created profile as default for current shell: 
@@ -55,12 +59,66 @@ export AWS_DEFAULT_PROFILE="aws_admin"
 ```
 
 
-### 4. create cluster with eksctl
-eksctl create cluster --name=ping-poc-base \
-  --nodes=3 --node-type=m5.2xlarge --set-kubeconfig-context=true \
+### 4. set up eks_cluster.yaml file
+For eksctl, you can create a cluster with a command, or with a file. 
+I've found the file to be better because:
+- you have a stored representation of your cluster
+- you can edit the yaml in the future and apply the changes (example, to add a new node-group)
+
+
+sample yaml file: 
+```yaml
+## This is a SAMPLE eksctl deploy file. find more at: 
+# https://github.com/weaveworks/eksctl/tree/master/examples
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: cluster-name
+  region: us-east-1
+
+# vpc:
+#   id: "vpc-0ff086f1cae7dea2f"  # (optional, must match VPC ID used for each subnet below)
+#   subnets:
+#     # must provide 'private' and/or 'public' subnets by availibility zone as shown
+#     public:
+#       us-west-2d:
+#         id: "subnet-0030b2ed693c99c56"
+#       us-west-2b:
+#         id: "subnet-08fadddc16ea5550d"
+#       us-west-2c:
+#         id: "subnet-05d8af2ff3770af6a"
+
+nodeGroups:
+  - name: m5ad4xl
+    instanceType: m5ad.4xlarge
+    desiredCapacity: 8
+    availabilityZones: ["us-east-2a", "us-east-2b","us-east-2c"]
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        externalDNS: true
+        certManager: true
+        appMesh: true
+        ebs: true
+        fsx: true
+        efs: true
+        albIngress: true
+        xRay: true
+        cloudWatch: true
+
+```
+
+view additional settings from: https://eksctl.io/
+
+once you like your yaml, run: 
+```
+eksctl create cluster --config-file=<path> \
   --kubeconfig=$HOME/.kube/config \
-  --region=us-west-2 --zones=us-west-2a,us-west-2b,us-west-2c \
+  --set-kubeconfig-context=true \
   --profile=${AWS_DEFAULT_PROFILE}
+```
 >**NOTE** This will take some time ~15mins
 ```
 ##SAMPLE OUTPUT
@@ -75,9 +133,21 @@ eksctl create cluster --name=ping-poc-base \
 ```
 
 ### 5. test kubectl with new context
+First, make sure you are using the right context. 
 ```
-kubectl config current-context
+#view available contexts
+kubectx
 
+#rename your context to a friendly name
+kubectx <NEW_NAME>=<NAME> 
+
+#use that context
+kubectx <NEW_NAME>
+```
+
+Then test it!
+
+```
 kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
 
 kubectl get all
