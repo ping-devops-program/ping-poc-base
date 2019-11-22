@@ -160,10 +160,14 @@ kubectl delete deployment hello-node
 kubectl create namespace ping-poc-base
 ```
 
-# Create RBAC roles for POC
-## FOR ADMIN  
+# Create RBAC roles
+
+- [for a poc](#for-a-poc)
+- [for a multi-tenant cluster](for-a-multi-tenant-cluster)
+
+## For a POC: 
 1. For this, whichever user creates the EKS cluster (aws_admin), should create a second IAM user with privileges for **EKS only**. 
-  <br/>
+
     - Follow https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console 
     - When selecting permissions: 1. "Attach Existing Policies directly" 2. search for "eks", add the 4 that appear. 
       > **Note**: hold on to the key/secret!!
@@ -208,3 +212,23 @@ kubectl create namespace ping-poc-base
             selfLink: /api/v1/namespaces/kube-system/configmaps/aws-auth
             uid: 8259e69f-a709-11e9-9281-0e94073a7804
           ```
+
+
+## For a Mult-Tenant Cluster
+
+the following steps will create user-accounts and a namespace for every person that is to use the cluster. 
+
+1. create an AWS IAM group for EKS users. 
+
+2. Create an AWS IAM user for each user and add them to the group. 
+
+3. see the scripts at: https://gitlab.corp.pingidentity.com/devops-program/gte-devops-scripts/blob/master/rsa-cluster-rbac/create-identity-mapping.sh
+
+>make sure your AWS profile is the one that created the EKS Cluster, then run this script for each user:
+
+```
+./create-identity-mapping.sh <aws-iam-username>
+```
+
+be prepared to provide the user/key info to the users.
+
