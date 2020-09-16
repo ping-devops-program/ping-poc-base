@@ -1,7 +1,0 @@
-ORCHESTRATION_TYPE=kubernetes
-
-PING_IDENTITY_DEVOPS_KEY=@PING_IDENTITY_DEVOPS_KEY@
-PING_IDENTITY_DEVOPS_USER=@PING_IDENTITY_DEVOPS_USER@
-
-SERVER_PROFILE_URL=https://www.github.com/ping-devops-program/ping-poc-base
-SERVER_PROFILE_PATH=server-profiles/clustered-pf/pingfederate

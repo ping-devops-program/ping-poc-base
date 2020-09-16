@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: Ingress
-metadata:
-  name: not-important
-  annotations:
-    nginx.ingress.kubernetes.io/whitelist-source-range: 75.80.23.87/32, 103.15.250.10/32, 67.174.252.139/32, 71.148.12.8/32, 103.15.250.0/24, 12.157.155.0/24, 12.179.132.0/22, 64.34.20.0/24, 65.162.137.0/24, 70.119.97.223/32, 173.240.160.0/21, 0.0.0.0/0

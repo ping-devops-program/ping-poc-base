@@ -1,5 +1,5 @@
 # Create EKS Cluster
-Kubernetes requires a cluster for deployments. This will walk through creating a cluster in AWS with `eksctl`
+Kubernetes requires a cluster for deployments. This will walk through creating a cluster in AWS with `eksct
 
 ### 1. Install CLIs
   1. awscli
@@ -78,21 +78,21 @@ metadata:
   region: us-east-1
 
 # vpc:
-#   id: "vpc-0ff086f1cae7dea2f"  # (optional, must match VPC ID used for each subnet below)
+#   id: "vpc-0ff086f1cae7defff"  # (optional, must match VPC ID used for each subnet below)
 #   subnets:
 #     # must provide 'private' and/or 'public' subnets by availibility zone as shown
 #     public:
 #       us-west-2d:
-#         id: "subnet-0030b2ed693c99c56"
+#         id: "subnet-0030b2ed693c99fff"
 #       us-west-2b:
-#         id: "subnet-08fadddc16ea5550d"
+#         id: "subnet-08fadddc16ea55fff"
 #       us-west-2c:
-#         id: "subnet-05d8af2ff3770af6a"
+#         id: "subnet-05d8af2ff3770afff"
 
 nodeGroups:
-  - name: m5ad4xl
-    instanceType: m5ad.4xlarge
-    desiredCapacity: 8
+  - name: base
+    instanceType: t3.xlarge
+    desiredCapacity: 2
     availabilityZones: ["us-east-2a", "us-east-2b","us-east-2c"]
     iam:
       withAddonPolicies:
@@ -108,9 +108,28 @@ nodeGroups:
         xRay: true
         cloudWatch: true
 
+fargateProfiles:
+  - name: fp-default
+    selectors:
+      # All workloads in the "default" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: default
+      # All workloads in the "kube-system" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: kube-system
+  - name: fp-dev
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: dev
+        labels:
+          env: dev
+          checks: passed
+
 ```
 
 view additional settings from: https://eksctl.io/
+and additional fargate settings from: https://eksctl.io/usage/fargate-support/
 
 once you like your yaml, run: 
 ```
@@ -119,7 +138,7 @@ eksctl create cluster --config-file=<path> \
   --set-kubeconfig-context=true \
   --profile=${AWS_DEFAULT_PROFILE}
 ```
->**NOTE** This will take some time ~15mins
+>**NOTE** This will take some time ~15-30mins
 ```
 ##SAMPLE OUTPUT
 #[ℹ]  using region us-east-1
@@ -148,11 +167,11 @@ kubectx <NEW_NAME>
 Then test it!
 
 ```
-kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+kubectl create deployment pingdataconsole --image pingidentity/pingdataconsole:edge
 
 kubectl get all
 
-kubectl delete deployment hello-node
+kubectl delete deployment pingdataconsole
 ```
 
 ### 6. Create a "namespace" 
