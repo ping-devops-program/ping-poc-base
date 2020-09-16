@@ -63,11 +63,11 @@ https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-macos
 
 5.  Test!: 
     ```
-    kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+    kubectl create deployment pingdataconsole --image pingidentity/pingdataconsole:edge
     ```
     > Note: look to see that this deployment is attached to your namespace. 
     ```
-    kubectl delete deployment hello-node
+    kubectl delete deployment pingdataconsole
     ```
 
 
@@ -80,3 +80,39 @@ This provides:
 - a great, maintained, baseline install of PingAccess, PingFederate, and PingDirectory. 
 - automatically sets up hostnames on AWS Route53 
 - configurable install using Kubernetes native config tool `kustomize`
+
+You can follow the guidance from the ping-cloud-base repo or you can use just the relevant tools. 
+To pick what you want to apply: 
+1. find a tool you like. 
+2. `kustomize build` it to see what you would be deploying.
+3. output kustomize build to a file then run kubectl apply -f, or pipe to kubectl apply. 
+
+Here's some important ones:
+
+external-dns - used to add route53 records that are requested from the cluster:
+```
+kustomize build https://github.com/pingidentity/ping-cloud-base/k8s-configs/cluster-tools/service-discovery/external-dns > external-dns.yaml
+
+kubectl apply -f external-dns.yaml
+```
+
+nginx ingress controller - sets up an NLB and allows you to expose apps through it. 
+
+```
+kustomize build https://github.com/pingidentity/ping-cloud-base/k8s-configs/cluster-tools/ingress/nginx/public > public-ingress.yaml
+
+kubectl apply -f public-ingress.yaml
+```
+
+For ping deployments, the devops-getting-started repo is great: 
+
+for a pingfederate cluster just set your kubernetes namespace then deploy. 
+```
+export PING_IDENTITY_K8S_NAMESPACE=default
+kustomize build https://github.com/pingidentity/pingidentity-devops-getting-started/20-kubernetes/06-clustered-pingfederate > pingfederate.yaml
+```
+
+and if you deployed the nginx yaml, you can expose your application: 
+https://github.com/pingidentity/pingidentity-devops-getting-started/blob/master/20-kubernetes/10-ingress/pingfederate-cluster-ingress.yaml
+
+
